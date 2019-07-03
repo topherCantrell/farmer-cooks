@@ -6,23 +6,51 @@ The ultimate goal is to make French Toast. The audio prompts include all 12 of t
 
 ![](art/map.jpg)
 
-  - get eggs from the ROOSTER (he goes to get them)
-  - get wheat and grind it into flour
-  - get milk from the COW and churn into butter
-  - the PIG says "No bacon with this dish, right?"
-  
-  Powdered sugar, fruit, syrup
-  
-  - barn COW
-  - chicken coup ROOSTER
-  - pig sty PIG
-  - field COYOTE
-  - tree near field BIRD
-  - stream FROG
-  - pond DUCK
-  - kitchen CAT
-  - porch DOG
-  - parlor SHEEP
-  - garden (waiting to plow) HORSE
-  - front yard TURKEY
-  
+## Parlor (Cat)
+
+"Use PAIL-with-milk" to get BUTTER. Milk goes away.
+
+## Porch (Dog)
+
+"Use empty" to get happy sounds from dog. "Use" to get growls.
+
+## Kitchen
+
+"Use wheat" to get BREAD (WHEAT goes away)
+
+"Use bread, use milk, use butter" to win.
+
+## Chicken Coop (Rooster)
+
+"Use worm" to get EGGS (WORM goes away)
+
+## Garden (Horse)
+
+## Barn (Cow)
+
+"Use empty" with PAIL in one hand to make PAIL-with-milk.
+
+## Yard (Turkey)
+
+"Use wheat" to get the PAIL. Wheat stays in play.
+
+## Pig Sty (Pig)
+
+The WATERGUN is here. Squirt the pig for funny messages like "no bacon with your toast, right?"
+
+## Tree (Bird)
+
+The WORM is here.
+
+## Pasture (Sheep)
+
+## Stream (Frog)
+
+"Use watergun" to fill it with water.
+
+## Pond (Duck)
+
+## Meadow (Coyote)
+
+"Use watergun" to unlock the passage north.
+
