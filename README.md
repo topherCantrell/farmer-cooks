@@ -4,6 +4,8 @@ Gary Dion's Audio Adventure Game on the Farmer Says
 
 The ultimate goal is to make French Toast. The audio prompts include all 12 of the original animal: SHEEP, DOG, DUCK, FROG, HORSE, COYOTE, ROOSTER, PIG, COW, BIRD, CAT, TURKEY
 
+![](art/map.jpg)
+
   - get eggs from the ROOSTER (he goes to get them)
   - get wheat and grind it into flour
   - get milk from the COW and churn into butter
