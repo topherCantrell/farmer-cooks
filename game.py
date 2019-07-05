@@ -1,3 +1,4 @@
+
 ROOMS = {
 
     # The "default" room is for objects that are out of play, general messages, and the
@@ -34,24 +35,24 @@ ROOMS = {
         # General command handlers
         "commands" : {
             # Default directions
-            "north" : "miscNoWay", # No ":" in this ... this must be a message reference
-            "south" : "miscNoWay",
-            "east" : "miscNoWay",
-            "west" : "miscNoWay",
+            "north" : "say miscNoWay", # No ":" in this ... this must be a message reference
+            "south" : "say miscNoWay",
+            "east" : "say miscNoWay",
+            "west" : "say miscNoWay",
             # Gets
             "getLeft *" : "",
-            "getLeft_handFull" : "",
+            "getLeft  _handFull" : "",
             "getRight *" : "",
-            "getRight_handFull" : "",
+            "getRight _handFull" : "",
             # Drops
-            "dropLeft_handEmpty" : "",
+            "dropLeft _handEmpty" : "",
             "dropLeft" : "",
-            "dropRight_handEmpty" : "",
+            "dropRight _handEmpty" : "",
             "dropRight" : "",
             # Use
             "useLeft_handEmpty" : "",
             "useLeft" : "",
-            "useRight_handEmpty" : "",
+            "useRight _handEmpty" : "",
             "useRight" : "",
             # Look
             "look" : "",
@@ -89,6 +90,43 @@ GAME = {
 
 ROOMS['Parlor']['objects'] = [ROOMS['default']['objects']['butter']]
 
+def get_input():
+    # Get target objects and hands here. This is very game-specific
+    return input('Command: ')
+
+def find_command(inp,commands):
+    matches = []
+    inp_words = inp.split(' ')
+    for target in commands:
+        target_words = target.split(' ')
+        if len(inp_words)!=len(target_words):
+            # Must be same the length
+            continue
+        match = True
+        num_wilds = 0
+        fewest_wilds = len(inp_words)
+        for i in range(len(inp_words)):
+            if target_words[i]=='*':
+                # Matches everything
+                num_wilds += 1
+                continue
+            if inp_words[i] != target_words[i]:
+                match = False
+                break
+        if match:
+            matches.append((commands[target],num_wilds))
+            if num_wilds<fewest_wilds:
+                fewest_wilds = num_wilds
+                
+        for i in range(len(matches)-1,-1,-1):
+            if matches[i][1]>fewest_wilds:
+                del matches[i]
+                
+        if matches:
+            return matches[0][0]
+        else:
+            return None    
+
 def find_message(s):
     # TODO check if it is callable
     
@@ -125,4 +163,27 @@ if GAME['right_hand']:
     print(t,end='')
     a,t = find_message(GAME['right_hand']['short'])
     print(t)
+
+
+
+# Processing here for objects, hands and empty/full
+
+# Factory methods here to override
+
+inp = get_input()
+
+# TODO wildcard search
+
+def execute_script(cmd_script):
+    print(':',cmd_script,':')
+    return True
+
+handled = False
+cmd_script = find_command(inp,room['commands'])
+if cmd_script:
+    handled = execute_script(cmd_script)
+    
+if not handled:
+    cmd_script = find_command(inp,ROOMS['default']['commands'])
+    handled = execute_script(cmd_script)
 
