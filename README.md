@@ -22,15 +22,61 @@ Sit down with the dog and eat.
 
 There is a churn here. When you make butter, the cat drinks some of the milk (not a game trigger -- just a description).
 
-```
-"south":
-    goto porch
+```python
+ROOMS = {
+
+    # The "default" room is for objects that are out of play, general messages, and the
+    # general command handlers (that specific rooms can override).
     
-"use pail-with-milk":   
-    move butter to parlor
-    move pail-with-milk gone
-    move pail to parlor
-    play madeButter
+    "default" : {
+        # List of objects in the room
+        "objects" : {
+            # The butter appears when you churn the milk
+            "butter" : {
+                "short" : "objButterShort:butter", # The short description is what appears in the inventory
+                "long" : "objButterLong:There is butter here", # The long description appears with the room
+                "moveable" : True # True (the default) if you can move the object
+            }
+        },   
+    
+        # General purpose messages
+        "messages" : {
+            "miscNoWay" : "You can't go that direction."
+            "miscHandEmpty" : "Your hand is empty"
+        },
+        	    
+        # General command handlers
+        "commands" : {
+            "north" : "miscNoWay",
+            "south" : "miscNoWay",
+            "east" : "miscNoWay",
+            "west" : "miscNoWay",
+            "get _handFull" : "say 'miscHandFull:Your hand is full.'",
+            "get *" : "move * to _hand",
+            "drop _handEmpty" : "say miscHandEmpty",
+            "drop *" : "move * to _currentRoom",
+            "use _handEmpty" : "say miscHandEmpty",
+            "use *" : "say 'miscNothingHappens:Nothing happens.'",
+            "look" : "describeRoom"
+        }
+    },
+    
+    "Parlor" : {
+        "description": "descParlor:You are in the parlor. There is a churn here. Door to the south.",
+		  "commands" : {
+		      "south": "goto Porch",		    
+			   "use pail_with_milk": [  
+			       "move butter to _here",
+			       "move pail_with_milk default",
+			       "move pail to _here",
+			       "say 'madeButter:You made butter! The cat drank some milk.'"
+			   ],
+			   "get _handEmpty" : "say 'The churn won\'t budge.'"
+		}
+    }
+
+}
+
 ```
 
 ## Porch (Dog)
