@@ -10,14 +10,16 @@ ROOMS = {
     
     "default" : {
         # List of objects in the room
-        "objects" : {
+        "objects" : [
             # The butter appears when you churn the milk
-            "butter" : {
+            {
+                "id" : "butter", # Referenced by the game
                 "short" : "objButterShort:butter", # The short description is what appears in the inventory
                 "long" : "objButterLong:There is butter here.", # The long description appears with the room
-                "moveable" : True # True (the default) if you can move the object
+                "stuck" : False, # False (the default) if you can move the object
+                "hidden" : False # True if the object is hidden (can't be seen or targeted)
             }
-        },   
+        ],   
     
         # Search order for message refs:
         # 1. Defined (as in "say miscNo:No!!!!!")
@@ -40,22 +42,17 @@ ROOMS = {
             "east" : "say miscNoWay",
             "west" : "say miscNoWay",
             # Gets
-            "getLeft *" : "",
-            "getLeft  _handFull" : "",
+            # The wildcard will be the target object or "" if there is no object.
+            "getLeft *" : "",            
             "getRight *" : "",
-            "getRight _handFull" : "",
             # Drops
-            "dropLeft _handEmpty" : "",
-            "dropLeft" : "",
-            "dropRight _handEmpty" : "",
-            "dropRight" : "",
+            "dropLeft *" : "",
+            "dropRight *" : "",
             # Use
-            "useLeft_handEmpty" : "",
-            "useLeft" : "",
-            "useRight _handEmpty" : "",
-            "useRight" : "",
+            "useLeft *" : "",
+            "useRight *" : "",
             # Look
-            "look" : "",
+            "look" : "describeRoom",
         }
     },
     
@@ -69,12 +66,22 @@ ROOMS = {
                    "move pail to _here",
                    "say 'madeButter:You made butter! The cat drank some milk.'"
                ],
-               "get _handEmpty" : "say 'The churn won\'t budge.'"
+               # These are processed before the "moveable" and "is empty" check.
+               "getLeft churn" : "say getChurn",
+               "getRight churn" : "say getChurn",
         },
           
         "messages" : {
-            "wow" : "Big wow here!"
-        }
+            "getChurn" : "The churn won't budge."
+        },
+        
+        "objects" : [
+            {
+                "id" : "churn",
+                "long" : "objChurnLong:There is a churn here.",
+                "stuck" : True
+            }
+        ]
     },
     
     
@@ -88,8 +95,6 @@ GAME = {
     'right_hand' : None
 }
 
-ROOMS['Parlor']['objects'] = [ROOMS['default']['objects']['butter']]
-
 def get_input():
     # Get target objects and hands here. This is very game-specific
     return input('Command: ')
@@ -97,14 +102,14 @@ def get_input():
 def find_command(inp,commands):
     matches = []
     inp_words = inp.split(' ')
+    fewest_wilds = len(inp_words)
     for target in commands:
         target_words = target.split(' ')
         if len(inp_words)!=len(target_words):
             # Must be same the length
             continue
         match = True
-        num_wilds = 0
-        fewest_wilds = len(inp_words)
+        num_wilds = 0        
         for i in range(len(inp_words)):
             if target_words[i]=='*':
                 # Matches everything
@@ -118,14 +123,14 @@ def find_command(inp,commands):
             if num_wilds<fewest_wilds:
                 fewest_wilds = num_wilds
                 
-        for i in range(len(matches)-1,-1,-1):
-            if matches[i][1]>fewest_wilds:
-                del matches[i]
-                
-        if matches:
-            return matches[0][0]
-        else:
-            return None    
+    for i in range(len(matches)-1,-1,-1):
+        if matches[i][1]>fewest_wilds:
+            del matches[i]
+            
+    if matches:
+        return matches[0][0]
+    else:
+        return None    
 
 def find_message(s):
     # TODO check if it is callable
@@ -145,7 +150,6 @@ def find_message(s):
     
 # Room description
 room = GAME['current_room']
-GAME['right_hand'] = ROOMS['default']['objects']['butter']
 a,t = find_message(room['description'])
 print(t)
 # Objects in room
@@ -164,13 +168,12 @@ if GAME['right_hand']:
     a,t = find_message(GAME['right_hand']['short'])
     print(t)
 
-
-
 # Processing here for objects, hands and empty/full
 
 # Factory methods here to override
 
 inp = get_input()
+print('*',inp,'*')
 
 # TODO wildcard search
 
