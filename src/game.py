@@ -1,5 +1,14 @@
 
-ROOMS = {
+# Commands:
+#   - north, east, south, west
+#   - action, look
+#   - useLeft, useRight (use) object is 2nd word or "-" for empty
+#   - getLeft, getRight (get) target object is 2nd word or "-" for nothing or "+" for hand-is-full
+#   - dropLeft, dropRight (drop) object is 2nd word or "-" for empty
+    
+ROOMS = {}
+
+ROOMS['default'] = {
 
     # The "default" room is for objects that are out of play, general messages, and the
     # general command handlers (that specific rooms can override).
@@ -8,85 +17,90 @@ ROOMS = {
     # name:this is the text
     # where the name can be referenced in other places and is the name of the audio file (no file extension needed)
     
-    "default" : {
-        # List of objects in the room
-        "objects" : [
-            # The butter appears when you churn the milk
-            {
-                "id" : "butter", # Referenced by the game
-                "short" : "objButterShort:butter", # The short description is what appears in the inventory
-                "long" : "objButterLong:There is butter here.", # The long description appears with the room
-                "stuck" : False, # False (the default) if you can move the object
-                "hidden" : False # True if the object is hidden (can't be seen or targeted)
-            }
-        ],   
     
-        # Search order for message refs:
-        # 1. Defined (as in "say miscNo:No!!!!!")
-        # 2. In the current room's "messages"
-        # 3. In the "default" room's "messages"
-    
-        # General purpose messages
-        "messages" : {
-            "miscNoWay" : "You can't go that direction.",
-            "miscHandEmpty" : "Your hand is empty",
-            "miscLeftHand" : "In your left hand: ",
-            "miscRightHand" : "In your right hand: "
-        },
-                
-        # General command handlers
-        "commands" : {
-            # Default directions
-            "north" : "say miscNoWay", # No ":" in this ... this must be a message reference
-            "south" : "say miscNoWay",
-            "east" : "say miscNoWay",
-            "west" : "say miscNoWay",
-            # Gets
-            # The wildcard will be the target object or "" if there is no object.
-            "getLeft *" : "",            
-            "getRight *" : "",
-            # Drops
-            "dropLeft *" : "",
-            "dropRight *" : "",
-            # Use
-            "useLeft *" : "",
-            "useRight *" : "",
-            # Look
-            "look" : "describeRoom",
+    # List of objects in the room
+    "objects" : [
+        # The butter appears when you churn the milk
+        {
+            "id" : "butter", # Referenced by the game
+            "short" : "objButterShort:butter", # The short description is what appears in the inventory
+            "long" : "objButterLong:There is butter here.", # The long description appears with the room
+            "stuck" : False, # [False] False if you can move the object
+            "hidden" : False # [False] True if the object is hidden (can't be seen or targeted)
         }
-    },
-    
-    "Parlor" : {
-        "description": "descParlor:This is the parlor. Churn is here. You can go south.",
-          "commands" : {
-              "south": "goto Porch",            
-               "use pail_with_milk": [  
-                   "move butter to _here",
-                   "move pail_with_milk default",
-                   "move pail to _here",
-                   "say 'madeButter:You made butter! The cat drank some milk.'"
-               ],
-               # These are processed before the "moveable" and "is empty" check.
-               "getLeft churn" : "say getChurn",
-               "getRight churn" : "say getChurn",
-        },
-          
-        "messages" : {
-            "getChurn" : "The churn won't budge."
-        },
-        
-        "objects" : [
-            {
-                "id" : "churn",
-                "long" : "objChurnLong:There is a churn here.",
-                "stuck" : True
-            }
-        ]
-    },
-    
-    
+    ],   
 
+    # Search order for message refs:
+    # 1. Defined (as in "say miscNo:No!!!!!")
+    # 2. In the current room's "messages"
+    # 3. In the "default" room's "messages"
+
+    # General purpose messages
+    "messages" : {
+        "miscNoWay" : "You can't go that direction.",
+        "miscHandEmpty" : "Your hand is empty",
+        "miscLeftHand" : "In your left hand: ",
+        "miscRightHand" : "In your right hand: "
+    },
+            
+    # General command handlers
+    "commands" : {
+        # Default directions
+        "north" : "say miscNoWay", # No ":" in this ... this must be a message reference
+        "south" : "say miscNoWay",
+        "east" : "say miscNoWay",
+        "west" : "say miscNoWay",
+        
+        # Look
+        "look" : "describeRoom",
+        
+        # Action
+        "action" : "",
+        
+        # Left/Right hand
+        
+        # Gets "-" matches before "+"
+        "more -" : "", # Get but something already in hand -- nothing to get
+        "more *" : "", # Get but something already in hand -- another object
+        "get -" : "", # Get but nothing to get        
+        "get *" : "", # Legal get of something
+        
+        # Drops
+        "drop -" : "", # Drop but nothing in hand
+        "drop *" : "", # Legal drop of something
+        
+        # Uses
+        "use -" : "", # Use but nothing in hand
+        "use *" : "", # Legal use of something     
+    }
 }
+  
+ROOMS['Parlor'] =  {
+    "description": "descParlor:This is the parlor. Churn is here. You can go south.",
+    "commands" : {
+       "south": "goto Porch",            
+       "use pail_with_milk": [  
+           "move butter to _here",
+           "move pail_with_milk default",
+           "move pail to _here",
+           "say 'madeButter:You made butter! The cat drank some milk.'"
+       ],
+       # These are processed before the "moveable" and "hand is empty" check.
+       "get churn" : "say getChurn",
+    },
+      
+    "messages" : {
+        "getChurn" : "The churn won't budge."
+    },
+    
+    "objects" : [
+        {
+            "id" : "churn",
+            "long" : "objChurnLong:There is a churn here.",
+            "stuck" : True
+        }
+    ]
+}    
 
 GAME = {
     'current_room' : ROOMS['Parlor'],
