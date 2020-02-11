@@ -15,8 +15,7 @@ ROOMS['default'] = {
     
     # Audio/Text messages are defined as
     # name:this is the text
-    # where the name can be referenced in other places and is the name of the audio file (no file extension needed)
-    
+    # where the name can be referenced in other places and is the name of the audio file (no file extension needed)    
     
     # List of objects in the room
     "objects" : [
@@ -37,42 +36,43 @@ ROOMS['default'] = {
 
     # General purpose messages
     "messages" : {
-        "miscNoWay" : "You can't go that direction.",
-        "miscHandEmpty" : "Your hand is empty.",
-        "miscNothingToGet" : "There is nothing to get.",
-        "miscHandFull" : "You already have something in that hand.",
-        "miscLeftHand" : "In your left hand: ",
-        "miscRightHand" : "In your right hand: ",
-        "miscOK" : "OK.",
+        "miscNoWay"          : "You can't go that direction.",
+        "miscHandEmpty"      : "Your hand is empty.",
+        "miscNothingToGet"   : "There is nothing to get.",
+        "miscHandFull"       : "You already have something in that hand.",
+        "miscLeftHand"       : "In your left hand: ",
+        "miscRightHand"      : "In your right hand: ",
+        "miscOK"             : "OK.",
         "miscNothingHappens" : "Nothing happens.",
+        "miscDontUnderstand" : ["I don't understand.","What?","Hmmmmmm."]
     },
             
     # General command handlers
     "commands" : [
         # Default directions
-        "north" , "say miscNoWay", # No ":" in this ... this must be a message reference
+        "north" , "say miscNoWay", 
         "south" , "say miscNoWay",
-        "east" , "say miscNoWay",
-        "west" , "say miscNoWay",
+        "east" ,  "say miscNoWay",
+        "west" ,  "say miscNoWay",
         
         # Look
         "look" , "generalDescribeRoom",
         
         # Action
-        "action" , "say miscNothingHappens", # ACTION nothing happens
+        "action" , "say miscNothingHappens",  # ACTION nothing happens
         
         # Gets                        
-        "get * - *" , "say miscNothingToGet", # GET left/right nothing to get (doesn't matter what's in the hand)
-        "get * * -" , "generalGet", # GET left/right something and nothing in hand (generic GET handler)
-        "get * * *" , "say miscHandFull", # GET left/right something but something in hand        
+        "get * - *" , "say miscNothingToGet", # GET left/right with nothing to get (doesn't matter what's in the hand)
+        "get * * -" , "generalGet",           # GET left/right something with nothing in hand (generic GET handler)
+        "get * * *" , "say miscHandFull",     # GET left/right something but something in hand        
         
         # Uses
-        "use * -","say miscHandEmpty", # USE left/right nothing in hand
-        "use * *","say miscNothingHappens", # Use left/right something in hand
+        "use * -","say miscHandEmpty",        # USE left/right with nothing in hand
+        "use * *","say miscNothingHappens",   # Use left/right with something in hand
         
         # Drops
-        "drop * -","say miscHandEmpty", # DROP left/right nothing in hand
-        "drop * *","generalDrop", # DROP left/right something in hand        
+        "drop * -","say miscHandEmpty",       # DROP left/right with nothing in hand
+        "drop * *","generalDrop",             # DROP left/right with something in hand        
     ]
 }
   
@@ -88,7 +88,7 @@ ROOMS['Parlor'] =  {
            "say 'madeButter:You made butter! The cat drank some milk.'"
        ],
        # These are processed before the "moveable" check.
-       "get * churn" , "say getChurn",
+       "get * churn *" , "say getChurn",
     ],
       
     "messages" : {
@@ -103,6 +103,12 @@ ROOMS['Parlor'] =  {
         }
     ]
 }    
+
+ROOMS['Porch'] =  {
+    "description": "descPorch:TODO The porch!",
+    "commands" : [],
+    "objects" : [],
+}
 
 GAME = {
     'current_room' : ROOMS['Parlor'],
