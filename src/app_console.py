@@ -54,20 +54,24 @@ def find_message(s):
     msg = None
     
     # This might be defined in-place
-    i = s.find(':')
+    i = s.find('|')
     if i>=0:        
-        msg=(s[0:i],s[i+1:])
+        msg=s[i+1:].strip()
     # Next, check the messages for the room
     elif 'messages' in GAME['current_room'] and s in GAME['current_room']['messages']:
-        return (s,GAME['current_room']['messages'][s])
+        msg = GAME['current_room']['messages'][s]
     # Next, check the default messages
     elif 'messages' in ROOMS['default'] and s in ROOMS['default']['messages']:
-        msg = (s,ROOMS['default']['messages'][s])
+        msg = ROOMS['default']['messages'][s]
     if msg:
         # TODO: check if it is callable
-        if isinstance(msg[1],list):
-            return (msg[0],random.choice(msg[1]))
-        return msg     
+        if isinstance(msg,list):
+            msg=random.choice(msg)        
+        if msg.startswith('<'):
+            i = msg.index('>')
+            return (msg[1:i].strip(),msg[i+1:].strip())
+            
+        return (None,msg)     
     # Nowhere to be found
     raise Exception('I could not find a message with id: '+s)       
 
@@ -85,7 +89,7 @@ def execute_script(cmd_script,inp_words):
 
 def general_describe_current_room(_cmd_words=None,_inp_words=None):
     # Room description
-    room = GAME['current_room']
+    room = GAME['current_room']    
     _,t = find_message(room['description'])
     print(t)
     # Objects in room

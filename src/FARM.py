@@ -21,10 +21,10 @@ ROOMS['default'] = {
     "objects" : [
         # The butter appears when you churn the milk
         {
-            "id" : "butter", # Referenced by the app_console
-            "short" : "objButterShort:butter", # The short description is what appears in the inventory
-            "long" : "objButterLong:There is butter here.", # The long description appears with the room
-            "stuck" : False, # [False] False if you can move the object
+            "id"     : "butter", # Referenced by the app_console
+            "short"  : "<objButterShort> butter", # The short description is what appears in the inventory
+            "long"   : "<objButterLong> There is butter here.", # The long description appears with the room
+            "stuck"  : False, # [False] False if you can move the object
             "hidden" : False # [False] True if the object is hidden (can't be seen or targeted)
         }
     ],   
@@ -36,48 +36,52 @@ ROOMS['default'] = {
 
     # General purpose messages
     "messages" : {
-        "miscNoWay"          : "You can't go that direction.",
-        "miscHandEmpty"      : "Your hand is empty.",
-        "miscNothingToGet"   : "There is nothing to get.",
-        "miscHandFull"       : "You already have something in that hand.",
-        "miscLeftHand"       : "In your left hand: ",
-        "miscRightHand"      : "In your right hand: ",
-        "miscOK"             : "OK.",
-        "miscNothingHappens" : "Nothing happens.",
-        "miscDontUnderstand" : ["I don't understand.","What?","Hmmmmmm."]
+        "miscNoWay"          : "<genMessNoWay> You can't go that direction.",
+        "miscHandEmpty"      : "<genMessHandEmpty> Your hand is empty.",
+        "miscNothingToGet"   : "<genMessNothingThere> There is nothing to get.",
+        "miscHandFull"       : "<genMessHandFull> You already have something in that hand.",
+        "miscLeftHand"       : "<genMessLeftHand> In your left hand: ",
+        "miscRightHand"      : "<genMessRightHand> In your right hand: ",
+        "miscOK"             : "<genMessOK> OK.",
+        "miscNothingHappens" : "<genMessNothingHappens> Nothing happens.",
+        "miscDontUnderstand" : [ 
+                               "<genMessWhat1> I don't understand.",
+                               "<genMessWhat2> What?",
+                               "<genMessWhat3> Hmmmmmm."
+                               ]
     },
             
     # General command handlers
     "commands" : [
         # Default directions
-        "north" , "say miscNoWay", 
-        "south" , "say miscNoWay",
-        "east" ,  "say miscNoWay",
-        "west" ,  "say miscNoWay",
+        "north" ,    "say miscNoWay",            # N,E,S,W say "can't go that way"
+        "south" ,    "say miscNoWay",
+        "east" ,     "say miscNoWay",
+        "west" ,     "say miscNoWay",
         
         # Look
-        "look" , "generalDescribeRoom",
+        "look" ,      "generalDescribeRoom",     # LOOK describe the room
         
         # Action
-        "action" , "say miscNothingHappens",  # ACTION nothing happens
+        "action" ,    "say miscNothingHappens",  # ACTION nothing happens
         
         # Gets                        
-        "get * - *" , "say miscNothingToGet", # GET left/right with nothing to get (doesn't matter what's in the hand)
-        "get * * -" , "generalGet",           # GET left/right something with nothing in hand (generic GET handler)
-        "get * * *" , "say miscHandFull",     # GET left/right something but something in hand        
+        "get * - *" , "say miscNothingToGet",    # GET left/right with nothing to get (doesn't matter what's in the hand)
+        "get * * -" , "generalGet",              # GET left/right something with nothing in hand (generic GET handler)
+        "get * * *" , "say miscHandFull",        # GET left/right something but something in hand        
         
         # Uses
-        "use * -","say miscHandEmpty",        # USE left/right with nothing in hand
-        "use * *","say miscNothingHappens",   # Use left/right with something in hand
+        "use * -",    "say miscHandEmpty",       # USE left/right with nothing in hand
+        "use * *",    "say miscNothingHappens",  # Use left/right with something in hand
         
         # Drops
-        "drop * -","say miscHandEmpty",       # DROP left/right with nothing in hand
-        "drop * *","generalDrop",             # DROP left/right with something in hand        
+        "drop * -",   "say miscHandEmpty",       # DROP left/right with nothing in hand
+        "drop * *",   "generalDrop",             # DROP left/right with something in hand        
     ]
 }
   
 ROOMS['Parlor'] =  {
-    "description": "descParlor:TODO This is the parlor. Churn is here. You can go south.",
+    "description": "descParlor| <descParlor> TODO This is the parlor. Churn is here. You can go south.",
     "commands" : [
        "south", "goto Porch",            
        "use * pail_with_milk", [  
@@ -85,34 +89,34 @@ ROOMS['Parlor'] =  {
            "move pail_with_milk default",
            "move pail to _here",
            # Single use prompts ... can define inline
-           "say 'madeButter:You made butter! The cat drank some milk.'"
+           "say 'madeButter| <madeButter> You made butter! The cat drank some milk.'"
        ],
        # These are processed before the "moveable" check.
        "get * churn *" , "say getChurn",
     ],
       
     "messages" : {
-        "getChurn" : "The churn won't budge."
+        "getChurn" : "objChurnWontBudge| <objChurnWontBudge> The churn won't budge."
     },
     
     "objects" : [
         {
             "id" : "churn",
-            "long" : "objChurnLong:There is a churn here.",
+            "long" : "objChurnLong| <objChurnLong> There is a churn here.",
             "stuck" : True
         }
     ]
 }    
 
 ROOMS['Porch'] =  {
-    "description": "descPorch:TODO The porch!",
-    "commands" : [],
-    "objects" : [],
+    "description"  : "descPorch| <descPorch> TODO The porch!",
+    "commands"     : [],
+    "objects"      : [],
 }
 
 GAME = {
     'current_room' : ROOMS['Parlor'],
-    'last_room' : None,
-    'left_hand' : None,
-    'right_hand' : None
+    'last_room'    : None,
+    'left_hand'    : None,
+    'right_hand'   : None
 }
