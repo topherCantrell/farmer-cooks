@@ -26,6 +26,18 @@ ROOMS['default'] = {
             "long"   : "<objButterLong> There is butter here.", # The long description appears with the room
             "stuck"  : False, # [False] False if you can move the object
             "hidden" : False # [False] True if the object is hidden (can't be seen or targeted)
+        },
+        # The empty pail
+        {
+            "id" : "pail",
+            "short" : "<objPailShort> empty pail",
+            "long"  : "<objPailLong> There is an empty pail here.",
+        },
+        # The pail with milk
+        {
+            "id" : "pail_with_milk",
+            "short" : "<objPailMilkShort> pail filled with milk",
+            "long"  : "<objPailMilkLong> There is a pail here full of milk.",
         }
     ],   
 
@@ -81,7 +93,7 @@ ROOMS['default'] = {
 }
   
 ROOMS['Parlor'] =  {
-    "description": "descParlor| <descParlor> TODO This is the parlor. Churn is here. You can go south.",
+    "description": "<descParlor> TODO This is the parlor. Churn is here. You can go south.",
     "commands" : [
        "south", "goto Porch",            
        "use * pail_with_milk", [  
@@ -89,34 +101,39 @@ ROOMS['Parlor'] =  {
            "move pail_with_milk default",
            "move pail to _here",
            # Single use prompts ... can define inline
-           "say 'madeButter| <madeButter> You made butter! The cat drank some milk.'"
+           "say '<madeButter> You made butter! The cat drank some milk.'"
        ],
        # These are processed before the "moveable" check.
        "get * churn *" , "say getChurn",
     ],
       
     "messages" : {
-        "getChurn" : "objChurnWontBudge| <objChurnWontBudge> The churn won't budge."
+        "getChurn" : "<objChurnWontBudge> The churn won't budge."
     },
     
     "objects" : [
         {
             "id" : "churn",
-            "long" : "objChurnLong| <objChurnLong> There is a churn here.",
+            "long" : "<objChurnLong> There is a churn here.",
             "stuck" : True
         }
     ]
 }    
 
 ROOMS['Porch'] =  {
-    "description"  : "descPorch| <descPorch> TODO The porch!",
+    "description"  : "<descPorch> TODO The porch!",
     "commands"     : [],
     "objects"      : [],
 }
 
 GAME = {
-    'current_room' : ROOMS['Parlor'],
+    'current_room' : ROOMS['Porch'],
     'last_room'    : None,
     'left_hand'    : None,
     'right_hand'   : None
 }
+
+# FOR TESTING
+# Put the pail with milk in the room with us
+ROOMS['Porch']['objects'].append(ROOMS['default']['objects'][2])
+del ROOMS['default']['objects'][2]
