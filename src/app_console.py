@@ -54,11 +54,11 @@ def find_message(s):
     msg = None
     
     # This might be defined in-place
-    if s.startswith('<'):
-        i = s.index('>')
-        return (s[1:i].strip(),s[i+1:].strip())
     
-    if 'messages' in GAME['current_room'] and s in GAME['current_room']['messages']:
+    
+    if s.startswith('<'):
+        msg = s    
+    elif 'messages' in GAME['current_room'] and s in GAME['current_room']['messages']:
         msg = GAME['current_room']['messages'][s]
     # Next, check the default messages
     elif 'messages' in ROOMS['default'] and s in ROOMS['default']['messages']:
@@ -67,6 +67,8 @@ def find_message(s):
         # TODO: check if it is callable
         if isinstance(msg,list):
             msg=random.choice(msg)        
+        i = msg.index('>')
+        return (msg[1:i].strip(),msg[i+1:].strip())
         
     # Nowhere to be found
     raise Exception('I could not find a message with id: '+s)       
