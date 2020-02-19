@@ -11,21 +11,58 @@ import random
 from FARM import ROOMS, GAME
 
 def get_input():
-    # Get target objects and hands here. This is very game-specific
+    '''Get the next command from the user
+    
+    Returns:
+        the user's input
+    '''
+    # Get target objects and hands here. This is very game/hardware-specific
     return input('Command: ')
 
-def find_command(inp_words,commands):
+def play_show_prompt(pr, eol=True):
+    '''Output the prompt (audio or text)
+    
+    Args:
+        pr: the prompt (audio,text)
+        eol: True to print an eol
+    '''
+    if not eol:
+        print(pr[1],end='')
+    else:
+        print(pr[1])
+
+def find_command(inp_words:list ,commands:list):
+    '''Find the command that matches the given input words
+    
+    The command list is of the form: [
+      "north", "script",
+      "south", "script"
+    ]
+    
+    Technically, the entries should be grouped (tuple or list), but this makes
+    the syntax easier for humans.
+    
+    Args:
+        inp_words: the list of input words
+        commands: list of commands and scripts
+    Returns:
+        a command handler from the commands or None if not found
+    '''
+        
+    # Debugging
     #print('##',inp_words,'##',commands)
-    matches = []    
-    fewest_wilds = len(inp_words)
+    
+    # Build a list of pairs: (command, number_of_wilds)
+    matches = [] # List of (command,num_wilds)
+    fewest_wilds = len(inp_words) # Highest possible value to start with
     for p in range(0,len(commands),2):
-        target = commands[p]
-        act = commands[p+1]
+        target = commands[p] # This is the command string
+        act = commands[p+1] # This is the script
         target_words = target.split(' ')
         if len(inp_words)!=len(target_words):
-            # Must be same the length
+            # Must be same the length to match
             continue
-        match = True
+        match = True # The initial value ... we check next
         num_wilds = 0        
         for i in range(len(inp_words)):
             if target_words[i]=='*':
@@ -35,88 +72,137 @@ def find_command(inp_words,commands):
             if inp_words[i] != target_words[i]:
                 match = False
                 break
+        # Add this to our list and maintain the fewest wilds (most specific command)
         if match:
             matches.append((act,num_wilds))
             if num_wilds<fewest_wilds:
                 fewest_wilds = num_wilds
-                
+    
+    # Keep only the most specific matches
     for i in range(len(matches)-1,-1,-1):
         if matches[i][1]>fewest_wilds:
             del matches[i]
             
     if matches:        
+        if len(matches)>1:
+            raise Exception('Multiple command matches.')
+        # Just one match ... return its script
         return matches[0][0]
     else:
         return None  
 
-def find_message(s):
+def find_message(s: str):
+    '''Find the requested message
+    
+    Messages can be defined inline (s would be the actual message here). Or they
+    can be defined in the current room. If neither of those, then we look in the
+    "default" room for global messages.
+    
+    Args:
+        s: the message or message-reference
+        
+    Returns:
+        the name of the audio file and the text (file,text)
+    '''
         
     msg = None
     
-    # This might be defined in-place
-    
-    
     if s.startswith('<'):
+        # This might be defined in-place
         msg = s    
-    elif 'messages' in GAME['current_room'] and s in GAME['current_room']['messages']:
-        msg = GAME['current_room']['messages'][s]
-    # Next, check the default messages
-    elif 'messages' in ROOMS['default'] and s in ROOMS['default']['messages']:
-        msg = ROOMS['default']['messages'][s]
-    if msg:
-        # TODO: check if it is callable
-        if isinstance(msg,list):
-            msg=random.choice(msg)        
-        i = msg.index('>')
-        return (msg[1:i].strip(),msg[i+1:].strip())
         
-    # Nowhere to be found
-    raise Exception('I could not find a message with id: '+s)       
+    elif 'messages' in GAME['current_room'] and s in GAME['current_room']['messages']:
+        # No ... check a reference to the current room
+        msg = GAME['current_room']['messages'][s]
+    
+    elif 'messages' in ROOMS['default'] and s in ROOMS['default']['messages']:
+        # No ... check the default (globals)
+        msg = ROOMS['default']['messages'][s]
+        
+    if not msg:
+        # Nowhere to be found
+        raise Exception('I could not find a message with id: '+s)  
+    
+    # Allow for functions that generate messages
+    if callable(msg):
+        msg = msg()
+    
+    # Allow a list of messages -- pick one at random
+    if isinstance(msg,list):
+        msg=random.choice(msg)
+        
+    # Audio and text        
+    i = msg.index('>')
+    return (msg[1:i].strip(),msg[i+1:].strip())                 
 
-def execute_script(cmd_script,inp_words):
+def execute_script(cmd_script,inp_words: list):
+    '''Execute the target command script
+    
+    Args:
+        cmd_script: the command script or list of command scripts
+        
+    Returns:
+        true if the command was handled or false if the handler says it didn't work
+    '''
+    
+    # For debugging
     #print('##',cmd_script,'##',inp_words)
+    
     if isinstance(cmd_script,list):
         for cmd in cmd_script:
-            execute_script(cmd,inp_words)
+            res = execute_script(cmd,inp_words)
+            if not res:
+                return False
         return True
     else:
         cmd_words = cmd_script.split(' ')
         cmd = COMMANDS[cmd_words[0]]
-        cmd(cmd_words,inp_words)
-        return True    
+        return cmd(cmd_words,inp_words)    
 
 def general_describe_current_room(_cmd_words=None,_inp_words=None):
+    '''Describe the current room (LOOK)
+    '''
+    
     # Room description
     room = GAME['current_room']    
-    _,t = find_message(room['description'])
-    print(t)
+    pr = find_message(room['description'])
+    play_show_prompt(pr)
+    
     # Objects in room
     for obj in room['objects']:
-        _,t = find_message(obj['long'])
-        print(t)
-    # Objects in hand
+        pr = find_message(obj['long'])
+        play_show_prompt(pr)
+        
+    # Objects in hands
     if GAME['left_hand']:
-        _,t = find_message('miscLeftHand')
-        print(t,end='')
-        _,t = find_message(GAME['left_hand']['short'])
-        print(t)
+        pr = find_message('miscLeftHand')
+        play_show_prompt(pr, False)
+        pr = find_message(GAME['left_hand']['short'])
+        play_show_prompt(pr)
+        
     if GAME['right_hand']:
-        _,t = find_message('miscRightHand')
-        print(t,end='')
-        _,t = find_message(GAME['right_hand']['short'])
-        print(t)
+        pr = find_message('miscRightHand')
+        play_show_prompt(pr, False)
+        pr = find_message(GAME['right_hand']['short'])
+        play_show_prompt(pr)
+
+#
+# General command handlers (common things)
+#
         
 def general_get(_cmd_words=None,_inp_words=None):
     print('TODO here')
 
 def general_say(cmd_words,_inp_words=None):
-    _,t = find_message(cmd_words[1])
-    print(t)
+    pr = find_message(cmd_words[1])
+    play_show_prompt(pr)
     
 def general_goto(cmd_words,_inp_words=None):
     GAME['current_room'] = ROOMS[cmd_words[1]]
     general_describe_current_room()
     
+# Map text script command names to the commands themselves
+
 COMMANDS = {
     'generalDescribeRoom' : general_describe_current_room,
     'generalGet' : general_get,
@@ -126,12 +212,14 @@ COMMANDS = {
 
 if __name__ == '__main__':
 
+    # Print the current room
     general_describe_current_room()
     
     while True:    
         
         room = GAME['current_room']
         
+        # Get the input words
         inp = get_input()
         inp_words = inp.split(' ')
         
@@ -145,17 +233,20 @@ if __name__ == '__main__':
                 if len(inp_words)!=2:
                     inp_words=inp_words[0:1] # This will be an error
                     # TODO: append object in hand
-                
+        
+        # Debugging        
         #print('*',inp_words,'*')
         
         handled = False
+        
+        # First try the room's commands
         cmd_script = find_command(inp_words,room['commands'])
         if cmd_script:
             handled = execute_script(cmd_script,inp_words)
             
+        # If not, fall back on the default commands 
         if not handled:
             cmd_script = find_command(inp_words,ROOMS['default']['commands'])
             if not cmd_script:
                 cmd_script = 'say miscDontUnderstand'  
             handled = execute_script(cmd_script,inp_words)
-

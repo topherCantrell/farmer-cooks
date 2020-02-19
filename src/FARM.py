@@ -8,6 +8,8 @@
     
 ROOMS = {}
 
+# These can all be built as one big literal. I find it easier to follow broken out.
+
 ROOMS['default'] = {
 
     # The "default" room is for objects that are out of play, general messages, and the
