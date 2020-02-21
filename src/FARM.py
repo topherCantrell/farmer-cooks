@@ -6,9 +6,10 @@
 #   - get left/right objToGet objInHand ("-" for nothing)
 #   - drop left/right objInHand ("-" for nothing)
     
-ROOMS = {}
-
 # These can all be built as one big literal. I find it easier to follow broken out.
+
+ROOMS = {}
+GAME = {}
 
 ROOMS['default'] = {
 
@@ -127,15 +128,3 @@ ROOMS['Porch'] =  {
     "commands"     : [],
     "objects"      : [],
 }
-
-GAME = {
-    'current_room' : ROOMS['Porch'],
-    'last_room'    : None,
-    'left_hand'    : None,
-    'right_hand'   : None
-}
-
-# FOR TESTING
-# Put the pail with milk in the room with us
-ROOMS['Porch']['objects'].append(ROOMS['default']['objects'][2])
-del ROOMS['default']['objects'][2]
