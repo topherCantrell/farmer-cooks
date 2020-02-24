@@ -24,5 +24,7 @@ class ConsoleEngine(GameEngine):
         '''
         if not eol:
             print(pr[1],end='')
+            if pr[1].endswith(':'):
+                print(' ',end='')
         else:
             print(pr[1])       

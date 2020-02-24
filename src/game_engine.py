@@ -156,6 +156,9 @@ class GameEngine:
         
         # Objects in room
         for obj in room['objects']:
+            if 'hidden' in obj and obj['hidden']:
+                # Allow for hidden objects
+                continue
             pr = self.find_message(obj['long'])
             self.play_show_prompt(pr)
             
@@ -228,6 +231,17 @@ class GameEngine:
             return targ['id']
         else:
             return '-'
+        
+    def get_first_movable_object_index(self):
+        room = self.current_room
+        for i in range(len(room['objects'])):
+            obj = room['objects'][i]
+            if 'stuck' in obj and obj['stuck']:
+                continue
+            if 'hidden' in obj and obj['hidden']:
+                continue
+            return i
+        return -1
                
     def main_loop(self):
     
@@ -252,8 +266,9 @@ class GameEngine:
                     else:
                         if inp_words[0]=='get':
                             # GET includes the target object
-                            if len(self.current_room['objects']):
-                                inp_words.append(self.current_room['objects'][0]['id'])
+                            i = self.get_first_movable_object_index()
+                            if i>=0:
+                                inp_words.append(self.current_room['objects'][i]['id'])
                             else:
                                 inp_words.append('-')
                         # GET, DROP, and USE include the object (if any) in the target hand

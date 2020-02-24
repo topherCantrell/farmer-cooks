@@ -78,4 +78,7 @@ engine.ROOMS = {
 
 engine.current_room = engine.ROOMS['RedRoom']
 
+#import prompt_manager
+#prompts = prompt_manager.find_all_prompts(engine)
+
 engine.main_loop()

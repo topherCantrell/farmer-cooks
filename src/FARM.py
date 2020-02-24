@@ -104,14 +104,15 @@ ROOMS['Parlor'] =  {
            "move pail_with_milk default",
            "move pail to _here",
            # Single use prompts ... can define inline
-           "say '<madeButter> You made butter! The cat drank some milk.'"
+           "say madeButter"
        ],
        # These are processed before the "moveable" check.
        "get * churn *" , "say getChurn",
     ],
       
     "messages" : {
-        "getChurn" : "<objChurnWontBudge> The churn won't budge."
+        "getChurn" : "<objChurnWontBudge> The churn won't budge.",
+        "madeButter" : "<madeButter> You made butter! The cat drank some milk."
     },
     
     "objects" : [
