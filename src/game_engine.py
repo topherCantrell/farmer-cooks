@@ -8,6 +8,7 @@ class GameEngine:
         self.COMMANDS = {
             'generalDescribeRoom' : self.general_describe_current_room,
             'generalGet'          : self.general_get,
+            'generalDrop'         : self.general_drop,
             'say'                 : self.general_say,
             'goto'                : self.general_goto,
         }
@@ -155,6 +156,9 @@ class GameEngine:
         
         # Objects in room
         for obj in room['objects']:
+            if 'hidden' in obj and obj['hidden']:
+                # Allow for hidden objects
+                continue
             pr = self.find_message(obj['long'])
             self.play_show_prompt(pr)
             
@@ -170,22 +174,75 @@ class GameEngine:
             self.play_show_prompt(pr, False)
             pr = self.find_message(self.right_hand['short'])
             self.play_show_prompt(pr)
+            
+        return True
     
     #
     # General command handlers (common things)
     #
             
-    def general_get(self,_cmd_words=None,_inp_words=None):
-        print('TODO here')
+    def general_get(self,_cmd_words=None,inp_words=None):
+        if inp_words[1]=='left':
+            self.left_hand = self.current_room['objects'][0]
+        else:
+            self.right_hand = self.current_room['objects'][0]
+        del self.current_room['objects'][0]
+        return True
+    
+    def general_drop(self,_cmd_words=None,inp_words=None):        
+        if inp_words[1]=='left':
+            self.current_room['objects'].append(self.left_hand)
+            self.left_hand = None
+        else:
+            self.current_room['objects'].append(self.right_hand)
+            self.right_hand = None
+        return True
     
     def general_say(self,cmd_words,_inp_words=None):
         pr = self.find_message(cmd_words[1])
         self.play_show_prompt(pr)
+        return True
         
     def general_goto(self,cmd_words,_inp_words=None):
         self.current_room = self.ROOMS[cmd_words[1]]
         self.general_describe_current_room()
+        return True
+    
+    def find_object(self, fid:str):
+        # First check the current room
+        for obj in self.current_room['objects']:
+            if obj['id'] == fid:
+                return ('room',obj)
+        # Now check the hands
+        if self.left_hand and self.left_hand['id']==fid:
+            return ('left_hand',self.left_hand)
+        if self.right_hand and self.right_hand['id']==fid:
+            return ('right_hand',self.right_hand)
+        # Not found anywhere
+        return (None,None)    
+    
+    def get_id_in_hand(self, hand:str):
+        if hand=='left':
+            targ = self.left_hand
+        else:
+            targ = self.right_hand
             
+        if targ:
+            return targ['id']
+        else:
+            return '-'
+        
+    def get_first_movable_object_index(self):
+        room = self.current_room
+        for i in range(len(room['objects'])):
+            obj = room['objects'][i]
+            if 'stuck' in obj and obj['stuck']:
+                continue
+            if 'hidden' in obj and obj['hidden']:
+                continue
+            return i
+        return -1
+               
     def main_loop(self):
     
         # Print the current room
@@ -197,21 +254,28 @@ class GameEngine:
             
             # Get the input words
             inp = self.get_input()
-            inp_words = inp.split(' ')
+            inp_words = inp.split(' ')            
             
-            # The get/drop/use handlers need the object in the target hand (or '-')
             if inp_words:
-                if inp_words[0]=='get':
-                    if len(inp_words)!=3:
-                        inp_words=inp_words[0:1] # This will be an error
-                        # TODO: append object in hand
-                elif inp_words[0]=='drop' or inp_words[0]=='use':
-                    if len(inp_words)!=2:
-                        inp_words=inp_words[0:1] # This will be an error
-                        # TODO: append object in hand
+                
+                if inp_words[0]=='get' or inp_words[0]=='drop' or inp_words[0]=='use':
+                    # These two-word commands target objects. GET takes the first object from the room.
+                    # DROP and USE take the object in the hand.
+                    if len(inp_words)!=2 or (inp_words[1]!='left' and inp_words[1]!='right'):
+                        inp_words = inp_words[0:1] # This results in an error
+                    else:
+                        if inp_words[0]=='get':
+                            # GET includes the target object
+                            i = self.get_first_movable_object_index()
+                            if i>=0:
+                                inp_words.append(self.current_room['objects'][i]['id'])
+                            else:
+                                inp_words.append('-')
+                        # GET, DROP, and USE include the object (if any) in the target hand
+                        inp_words.append(self.get_id_in_hand(inp_words[1]))                
             
             # Debugging        
-            #print('*',inp_words,'*')
+            # print('*',inp_words,'*')
             
             handled = False
             
